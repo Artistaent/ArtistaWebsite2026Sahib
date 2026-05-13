@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Artista Ent. — Think. Create. Impress.</title>
+  <meta name="description" content="Artista Ent. is a results-driven creative production company based in San Diego, CA." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=Allura&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
+</head>
+<body class="page-home">
+
+  <!-- ============== PRELOADER ============== -->
+  <div class="preloader" id="preloader" aria-hidden="true">
+    <div class="preloader__mark">
+      <span>ARTISTA ENT.</span>
+      <span class="preloader__count">000</span>
+    </div>
+  </div>
+
+  <!-- ============== BRAND MARK (outside the nav strip) ============== -->
+  <a href="index.html" class="nav-logo" aria-label="Artista Ent. — Home">
+    <img src="images/artista-1.png" alt="Artista Ent." class="nav-logo__img">
+  </a>
+
+  <!-- ============== PERSISTENT NAVIGATION ============== -->
+  <header class="site-nav" id="siteNav">
+    <nav class="nav-center" aria-label="Primary">
+      <ul>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="gallery.html">Services</a></li>
+        <li><a href="work.html">Gallery</a></li>
+        <li><a href="contact.html">Contact Us</a></li>
+      </ul>
+    </nav>
+    <button class="nav-menu" aria-label="Open menu">
+      <span class="nav-menu__label">Menu</span>
+      <span class="nav-menu__icon">
+        <i></i><i></i>
+      </span>
+    </button>
+  </header>
+
+  <!-- ============== CINEMATIC STACKED SECTIONS ============== -->
+  <main class="scroll-host">
+
+    <!-- ===== SECTION 1 — HERO ===== -->
+    <section class="cinema-section sec-hero" data-section="1" data-theme="light">
+      <div class="cinema-section__inner">
+        <div class="hero-grid">
+          <div class="hero-text">
+            <h1 class="brand-mega">
+              <span class="line"><span class="split-chars" data-split-chars>ARTISTA</span></span>
+              <span class="line"><span class="split-chars" data-split-chars style="--stagger-base: 0.45s;">ENT.</span></span>
+            </h1>
+            <p class="brand-tagline"><span class="split-chars" data-split-chars style="--stagger-base: 0.85s;">THINK. CREATE. IMPRESS.</span></p>
+            <span class="hero-location reveal" style="transition-delay: 1.4s;">SAN DIEGO, CA</span>
+          </div>
+          <div class="hero-visual" data-parallax="0.06">
+            <div class="visual-frame visual-frame--hero fade-img">
+              <div class="fade-img__inner" style="position:absolute;inset:0;">
+                <iframe class="visual-frame__media visual-frame__media--vimeo"
+                        src="https://player.vimeo.com/video/1191702478?autoplay=1&loop=1&muted=1&background=1&dnt=1"
+                        title="Artista Ent. hero reel"
+                        frameborder="0"
+                        allow="autoplay; fullscreen; picture-in-picture"
+                        allowfullscreen
+                        loading="lazy"></iframe>
+              </div>
+              <a href="https://vimeo.com/1191702478?fl=pl&fe=sh" target="_blank" rel="noopener noreferrer" class="play-btn play-btn--lg" aria-label="Watch reel on Vimeo">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION 2 — FULL-BLEED VIDEO ===== -->
+    <section class="cinema-section sec-video" data-section="video" data-theme="dark">
+      <iframe class="sec-video__media"
+              src="https://player.vimeo.com/video/1189513043?autoplay=1&loop=1&muted=1&background=1&dnt=1"
+              title="Artista Ent. — full-bleed reel"
+              frameborder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowfullscreen
+              loading="lazy"
+              aria-hidden="true"></iframe>
+    </section>
+
+    <!-- ===== SECTION 3 — ABOUT / INTRO ===== -->
+    <section class="cinema-section sec-about" data-section="3" data-theme="dark">
+      <div class="cinema-section__inner">
+        <div class="bg-script" aria-hidden="true" data-parallax="0.04">Artista</div>
+        <div class="about-grid">
+          <div class="about-text">
+            <h2 class="display-xl">
+              <span class="split-chars" data-split-chars>ARTISTA ENT. IS A  </span><br/>
+              <span class="split-chars" data-split-chars style="--stagger-base: 0.32s;">RESULTS-DRIVEN</span><br/>
+              <span class="split-chars" data-split-chars style="--stagger-base: 0.6s;">CREATIVE PRODUCTION</span><br/>
+              <span class="split-chars" data-split-chars style="--stagger-base: 0.95s;">COMPANY.</span>
+            </h2>
+            <span class="hr-rule reveal"></span>
+            <p class="lede reveal">We specialize in creating content that not only educates but also drives sales effectively.</p>
+            <a href="gallery.html" class="link-arrow reveal">
+              <span>VIEW CASE STUDIES</span>
+              <svg viewBox="0 0 40 12" aria-hidden="true"><path d="M0 6h36M30 1l5 5-5 5" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>
+            </a>
+          </div>
+          <div class="about-visual" data-parallax="0.08">
+            <div class="visual-frame visual-frame--about fade-img">
+              <div class="fade-img__inner" style="position:absolute;inset:0;">
+                <iframe class="visual-frame__media visual-frame__media--vimeo"
+                        src="https://player.vimeo.com/video/1064533432?autoplay=1&loop=1&muted=1&background=1&dnt=1"
+                        title="Artista Ent. reel"
+                        frameborder="0"
+                        allow="autoplay; fullscreen; picture-in-picture"
+                        allowfullscreen
+                        loading="lazy"></iframe>
+              </div>
+              <a href="https://vimeo.com/1064533432?fl=pl&fe=sh" target="_blank" rel="noopener noreferrer" class="play-btn" aria-label="Watch reel on Vimeo">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION 3 — FEATURED WORK ===== -->
+    <section class="cinema-section sec-work" data-section="3" data-theme="dark">
+      <div class="cinema-section__inner">
+        <div class="work-wrap">
+
+          <div class="work-grid work-grid--pair">
+            <article class="work-card work-card--vid reveal">
+              <iframe class="work-card__media work-card__media--vimeo"
+                      src="https://player.vimeo.com/video/1160273113?autoplay=1&loop=1&muted=1&background=1&dnt=1"
+                      title="Featured reel — Social & UGC"
+                      frameborder="0"
+                      allow="autoplay; fullscreen; picture-in-picture"
+                      allowfullscreen
+                      loading="lazy"></iframe>
+              <a href="https://vimeo.com/1160273113?fl=pl&fe=sh" target="_blank" rel="noopener noreferrer" class="play-btn" aria-label="Watch reel on Vimeo">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+              </a>
+            </article>
+
+            <article class="work-card work-card--vid reveal">
+              <iframe class="work-card__media work-card__media--vimeo"
+                      src="https://player.vimeo.com/video/1188273137?autoplay=1&loop=1&muted=1&background=1&dnt=1"
+                      title="Featured reel — Brand film"
+                      frameborder="0"
+                      allow="autoplay; fullscreen; picture-in-picture"
+                      allowfullscreen
+                      loading="lazy"></iframe>
+              <a href="https://vimeo.com/1188273137?fl=pl&fe=sh" target="_blank" rel="noopener noreferrer" class="play-btn" aria-label="Watch reel on Vimeo">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+              </a>
+            </article>
+          </div>
+
+          <!-- ===== CLIENT LOGO MARQUEE — bottom of featured work ===== -->
+          <section class="logo-marquee" aria-hidden="true">
+            <div class="marquee-row marquee-row--ltr">
+              <div class="marquee-track">
+                <img class="marquee-logo lm-md" src="logos/Mitchell-Firm-logo_white.webp" alt="">
+                <img class="marquee-logo lm-md" src="logos/Cellev8-red-correct.png" alt="">
+                <img class="marquee-logo lm-lg" src="logos/DryWater_1200w_White_Logotype.png" alt="">
+                <img class="marquee-logo lm-md" src="logos/cosd-logo-primary-blue-transparent.png" alt="">
+                <img class="marquee-logo lm-sm" src="logos/wave-logo-transparent.png" alt="">
+                <img class="marquee-logo lm-md" src="logos/protein-pints-logo-transparent.png" alt="">
+                <img class="marquee-logo lm-md" src="logos/epic-wings-logo-transparent.png" alt="">
+                <img class="marquee-logo lm-md" src="logos/exclaim-logo-transparent.png" alt="">
+                <!-- duplicate set for seamless loop -->
+                <img class="marquee-logo lm-md" src="logos/Mitchell-Firm-logo_white.webp" alt="">
+                <img class="marquee-logo lm-md" src="logos/Cellev8-red-correct.png" alt="">
+                <img class="marquee-logo lm-lg" src="logos/DryWater_1200w_White_Logotype.png" alt="">
+                <img class="marquee-logo lm-md" src="logos/cosd-logo-primary-blue-transparent.png" alt="">
+                <img class="marquee-logo lm-sm" src="logos/wave-logo-transparent.png" alt="">
+                <img class="marquee-logo lm-md" src="logos/protein-pints-logo-transparent.png" alt="">
+                <img class="marquee-logo lm-md" src="logos/epic-wings-logo-transparent.png" alt="">
+                <img class="marquee-logo lm-md" src="logos/exclaim-logo-transparent.png" alt="">
+              </div>
+            </div>
+            <div class="marquee-row marquee-row--rtl">
+              <div class="marquee-track">
+                <img class="marquee-logo lm-md" src="logos/epic-wings-logo-transparent.png" alt="">
+                <img class="marquee-logo lm-lg" src="logos/DryWater_1200w_White_Logotype.png" alt="">
+                <img class="marquee-logo lm-md" src="logos/exclaim-logo-transparent.png" alt="">
+                <img class="marquee-logo lm-md" src="logos/cosd-logo-primary-blue-transparent.png" alt="">
+                <img class="marquee-logo lm-md" src="logos/Mitchell-Firm-logo_white.webp" alt="">
+                <img class="marquee-logo lm-sm" src="logos/wave-logo-transparent.png" alt="">
+                <img class="marquee-logo lm-md" src="logos/protein-pints-logo-transparent.png" alt="">
+                <img class="marquee-logo lm-md" src="logos/Cellev8-red-correct.png" alt="">
+                <!-- duplicate set for seamless loop -->
+                <img class="marquee-logo lm-md" src="logos/epic-wings-logo-transparent.png" alt="">
+                <img class="marquee-logo lm-lg" src="logos/DryWater_1200w_White_Logotype.png" alt="">
+                <img class="marquee-logo lm-md" src="logos/exclaim-logo-transparent.png" alt="">
+                <img class="marquee-logo lm-md" src="logos/cosd-logo-primary-blue-transparent.png" alt="">
+                <img class="marquee-logo lm-md" src="logos/Mitchell-Firm-logo_white.webp" alt="">
+                <img class="marquee-logo lm-sm" src="logos/wave-logo-transparent.png" alt="">
+                <img class="marquee-logo lm-md" src="logos/protein-pints-logo-transparent.png" alt="">
+                <img class="marquee-logo lm-md" src="logos/Cellev8-red-correct.png" alt="">
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION 4 — CONTACT ===== -->
+    <section class="cinema-section sec-contact" data-section="4" data-theme="dark">
+      <div class="cinema-section__inner">
+        <div class="contact-bg" data-bg-parallax style="background-image:url('images/gg1.png');"></div>
+        <div class="contact-veil"></div>
+
+        <div class="contact-grid">
+          <div class="contact-text">
+            <span class="eyebrow eyebrow--light reveal">CONTACT US</span>
+            <h2 class="display-xl">
+              <span class="split-chars" data-split-chars>LET'S CREATE</span><br/>
+              <span class="split-chars" data-split-chars style="--stagger-base: 0.6s;">SOMETHING ICONIC.</span>
+            </h2>
+            <span class="hr-rule hr-rule--light reveal"></span>
+            <h4 class="contact-subhead reveal">LOOKING TO WORK WITH US?</h4>
+            <p class="lede reveal">Let's take your brand to the next level with marketing people love.</p>
+
+            <ul class="contact-list" data-line-stack>
+              <li>
+                <a href="mailto:contact@artistaent.com" class="contact-list__row">
+                  <span class="contact-list__label">MAIL</span>
+                  <span class="contact-list__value">CONTACT@ARTISTAENT.COM</span>
+                  <svg class="contact-list__arrow" viewBox="0 0 40 12" aria-hidden="true"><path d="M0 6h36M30 1l5 5-5 5" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>
+                </a>
+              </li>
+              <li>
+                <a href="https://www.instagram.com/artistaentertainment?utm_source=ig_web_button_share_sheet&amp;igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" class="contact-list__row">
+                  <span class="contact-list__label">FOLLOW</span>
+                  <span class="contact-list__value">INSTAGRAM</span>
+                  <svg class="contact-list__arrow" viewBox="0 0 40 12" aria-hidden="true"><path d="M0 6h36M30 1l5 5-5 5" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>
+                </a>
+              </li>
+              <li>
+                <a href="https://www.linkedin.com/company/artista-entertainment" target="_blank" rel="noopener noreferrer" class="contact-list__row">
+                  <span class="contact-list__label">CONNECT</span>
+                  <span class="contact-list__value">LINKEDIN</span>
+                  <svg class="contact-list__arrow" viewBox="0 0 40 12" aria-hidden="true"><path d="M0 6h36M30 1l5 5-5 5" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+
+        <footer class="site-footer site-footer--home">
+          <span>COPYRIGHT ©2022 ARTISTA ENT.</span>
+        </footer>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="js/script.js" defer></script>
+</body>
+</html>

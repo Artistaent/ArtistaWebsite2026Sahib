@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gallery — Artista Ent.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=Allura&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <!--
+    NOTE: Lenis smooth-scroll is intentionally NOT loaded on this page.
+    The Time Machine slider hijacks wheel/touch via preventDefault to
+    drive the depth-stack animation; Lenis would intercept those events
+    and break the slider.
+  -->
+  <style>
+    /* ============================================================
+       TIME MACHINE — vertical depth-stack image slider
+       Vanilla port of the React + Framer Motion "time-machine" component.
+       Spring is approximated with a fast easeOut transform transition;
+       opacity + filter use a 200ms ease-in-out (matches original).
+       ============================================================ */
+    body.page-gallery { background: #000; color: #fff; overflow: hidden; }
+
+    /* Iridescent black-oil shader canvas — sits behind the slider as a
+       fullscreen fixed background. pointer-events:none so the slider
+       (above) still receives wheel/touch; we listen on window for the
+       cursor reaction so the shader still reacts to movement. */
+    #oilCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      display: block;
+      pointer-events: none;
+      background: #000;
+    }
+
+    .time-machine {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;       /* let the shader behind show through */
+      z-index: 1;                    /* above the canvas */
+      touch-action: none;            /* let our handlers own touch */
+    }
+    .tm-track {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .tm-card {
+      position: absolute;
+      width: 85%;
+      max-width: 800px;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
+      will-change: transform, opacity, filter;
+      transition:
+        transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+        opacity   200ms ease-in-out,
+        filter    200ms ease-in-out;
+    }
+    .tm-card img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* Tiny hint overlay so first-time visitors know to scroll */
+    .tm-hint {
+      position: fixed;
+      left: 50%;
+      bottom: 32px;
+      transform: translateX(-50%);
+      z-index: 50;
+      font-family: var(--f-display, "Inter", sans-serif);
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.55);
+      pointer-events: none;
+      animation: tm-hint-fade 4s ease-in-out forwards;
+    }
+    @keyframes tm-hint-fade {
+      0%, 70% { opacity: 1; }
+      100%    { opacity: 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tm-card { transition: none; }
+    }
+  </style>
+</head>
+<body class="page-gallery">
+  <a href="index.html" class="nav-logo" aria-label="Artista Ent. — Home">
+    <img src="images/artista-1.png" alt="Artista Ent." class="nav-logo__img">
+  </a>
+  <header class="site-nav" id="siteNav">
+    <nav class="nav-center" aria-label="Primary">
+      <ul>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="gallery.html">Services</a></li>
+        <li><a href="work.html" class="is-active">Gallery</a></li>
+        <li><a href="contact.html">Contact Us</a></li>
+      </ul>
+    </nav>
+    <button class="nav-menu" aria-label="Open menu">
+      <span class="nav-menu__label">Menu</span>
+      <span class="nav-menu__icon"><i></i><i></i></span>
+    </button>
+  </header>
+
+  <!-- ============== IRIDESCENT OIL SHADER (background) ============== -->
+  <canvas id="oilCanvas" aria-hidden="true"></canvas>
+
+  <!-- ============== TIME MACHINE SLIDER ============== -->
+  <main id="tm-stage" class="time-machine" aria-label="Image gallery">
+    <div id="tm-track" class="tm-track"></div>
+  </main>
+  <div class="tm-hint" aria-hidden="true">scroll · drag · ←  →</div>
+
+  <script src="js/script.js" defer></script>
+  <script>
+    /* ============================================================
+       TIME MACHINE — vanilla JS port
+       - Continuous index (unbounded ±) with positive-modulo image lookup
+         so the stack loops infinitely in both directions.
+       - Wheel + touch events accumulate delta then advance one step
+         per SCROLL_THRESHOLD, throttled to MIN_UPDATE_INTERVAL ms.
+       - Arrow keys advance ±1.
+       - 20 reusable card DOM nodes (BUFFER_SIZE*2 + visible + 1) — never
+         create or destroy nodes; we just rewrite transform/src per render.
+       ============================================================ */
+    (function () {
+      const IMAGES = [
+        "https://cdn.cosmos.so/5689a5cd-92a5-4cb1-b014-263da4f55731?format=jpeg",
+        "https://cdn.cosmos.so/c4588488-0021-4804-9c29-a43059378bfe?format=jpeg",
+        "https://cdn.cosmos.so/de8c561b-e4e4-48f3-9068-30d63b92c43e?format=jpeg",
+        "https://cdn.cosmos.so/207b3ba7-13ef-496b-a9cb-2a718e14a24e?format=jpeg",
+        "https://cdn.cosmos.so/6c41e632-d300-4516-a7af-9a1f7c0aef94?format=jpeg",
+        "https://cdn.cosmos.so/e552eaac-8251-4890-b954-e988fc4bf2e0?format=jpeg",
+        "https://cdn.cosmos.so/5689a5cd-92a5-4cb1-b014-263da4f55731?format=jpeg",
+      ];
+
+      const FRAME_OFFSET = -30;
+      const FRAMES_VISIBLE_LENGTH = 3;
+      const SCROLL_THRESHOLD = 40;
+      const BUFFER_SIZE = 8;
+      const MIN_UPDATE_INTERVAL = 75;
+      const TOTAL_CARDS = BUFFER_SIZE * 2 + FRAMES_VISIBLE_LENGTH + 1;
+
+      function clamp(v, min, max) { return Math.min(Math.max(v, min), max); }
+      function posMod(n, m) { return ((n % m) + m) % m; }
+
+      const stage = document.getElementById("tm-stage");
+      const track = document.getElementById("tm-track");
+
+      // Pre-create cards once and reuse them
+      const cards = [];
+      for (let i = 0; i < TOTAL_CARDS; i++) {
+        const card = document.createElement("div");
+        card.className = "tm-card";
+        const img = document.createElement("img");
+        img.alt = "";
+        img.draggable = false;
+        card.appendChild(img);
+        track.appendChild(card);
+        cards.push(card);
+      }
+
+      let currentIndex = 0;
+      let scrollAccumulator = 0;
+      let lastUpdateTime = Date.now();
+      let touchStartY = 0;
+
+      function render() {
+        const start = currentIndex - BUFFER_SIZE;
+        for (let i = 0; i < TOTAL_CARDS; i++) {
+          const cardIndex = start + i;
+          const offsetIndex = cardIndex - currentIndex;
+          const blur = currentIndex > cardIndex ? 2 : 0;
+          const opacity = currentIndex > cardIndex ? 0 : 1;
+          const scale = clamp(1 - offsetIndex * 0.08, 0.08, 2);
+          const y = clamp(
+            offsetIndex * FRAME_OFFSET,
+            FRAME_OFFSET * FRAMES_VISIBLE_LENGTH,
+            Number.POSITIVE_INFINITY
+          );
+          const imageIndex = posMod(cardIndex, IMAGES.length);
+
+          const card = cards[i];
+          card.style.transform = "translate3d(0, " + y + "px, 0) scale(" + scale + ")";
+          card.style.opacity = opacity;
+          card.style.filter = "blur(" + blur + "px)";
+          card.style.zIndex = 1000 - cardIndex;
+
+          const img = card.firstElementChild;
+          const src = IMAGES[imageIndex];
+          if (img.dataset.src !== src) {
+            img.src = src;
+            img.dataset.src = src;
+          }
+        }
+      }
+
+      function step(delta) {
+        currentIndex += delta;
+        render();
+      }
+
+      function tryAdvance() {
+        if (Math.abs(scrollAccumulator) < SCROLL_THRESHOLD) return;
+        const now = Date.now();
+        if (now - lastUpdateTime < MIN_UPDATE_INTERVAL) return;
+        const delta = scrollAccumulator > 0 ? 1 : -1;
+        step(delta);
+        scrollAccumulator = 0;
+        lastUpdateTime = now;
+      }
+
+      function handleWheel(e) {
+        e.preventDefault();
+        scrollAccumulator += e.deltaY;
+        tryAdvance();
+      }
+
+      function handleTouchStart(e) {
+        touchStartY = e.touches[0].clientY;
+      }
+      function handleTouchMove(e) {
+        e.preventDefault();
+        const touchY = e.touches[0].clientY;
+        const deltaY = touchStartY - touchY;
+        touchStartY = touchY;
+        scrollAccumulator += deltaY;
+        tryAdvance();
+      }
+
+      function handleKeydown(e) {
+        if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+          e.preventDefault();
+          step(1);
+        } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+          e.preventDefault();
+          step(-1);
+        }
+      }
+
+      stage.addEventListener("wheel", handleWheel, { passive: false });
+      stage.addEventListener("touchstart", handleTouchStart, { passive: false });
+      stage.addEventListener("touchmove", handleTouchMove, { passive: false });
+      window.addEventListener("keydown", handleKeydown);
+
+      // Initial paint
+      render();
+    })();
+  </script>
+
+  <!-- ============================================================
+       IRIDESCENT BLACK-OIL SHADER — vanilla port of oil-shader.tsx
+       Real-time 2D Stable-Fluids sim rendered as iridescent oil.
+       The pointer disturbs the surface; idle drift keeps it alive.
+       Listens on window for pointermove so it still reacts even
+       though the canvas itself has pointer-events:none.
+       ============================================================ -->
+  <script>
+  (function () {
+    // Skip the WebGL fluid sim on touch / small screens — save GPU + battery.
+    var isTouch = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+    if (isTouch || window.innerWidth < 820) return;
+
+    var canvas = document.getElementById("oilCanvas");
+    if (!canvas) return;
+
+    var gl = canvas.getContext("webgl2", {
+      alpha: false, antialias: false, depth: false, stencil: false,
+      premultipliedAlpha: false, preserveDrawingBuffer: false,
+      powerPreference: "high-performance",
+    });
+    if (!gl) {
+      canvas.style.background = "radial-gradient(ellipse at center,#0a0a0f 0%,#000 70%)";
+      return;
+    }
+    var floatExt = gl.getExtension("EXT_color_buffer_float");
+    var linearFloat = gl.getExtension("OES_texture_float_linear");
+    if (!floatExt) {
+      canvas.style.background = "radial-gradient(ellipse at center,#0a0a0f 0%,#000 70%)";
+      return;
+    }
+
+    var baseVert = `#version 300 es
+    precision highp float;
+    in vec2 a_pos;
+    out vec2 v_uv; out vec2 v_l; out vec2 v_r; out vec2 v_t; out vec2 v_b;
+    uniform vec2 u_texel;
+    void main() {
+      v_uv = a_pos * 0.5 + 0.5;
+      v_l = v_uv - vec2(u_texel.x, 0.0);
+      v_r = v_uv + vec2(u_texel.x, 0.0);
+      v_t = v_uv + vec2(0.0, u_texel.y);
+      v_b = v_uv - vec2(0.0, u_texel.y);
+      gl_Position = vec4(a_pos, 0.0, 1.0);
+    }`;
+
+    var copyFrag = `#version 300 es
+    precision highp float;
+    in vec2 v_uv; uniform sampler2D u_tex; out vec4 o;
+    void main() { o = texture(u_tex, v_uv); }`;
+
+    var clearFrag = `#version 300 es
+    precision highp float;
+    in vec2 v_uv; uniform sampler2D u_tex; uniform float u_value; out vec4 o;
+    void main() { o = u_value * texture(u_tex, v_uv); }`;
+
+    var splatFrag = `#version 300 es
+    precision highp float;
+    in vec2 v_uv;
+    uniform sampler2D u_target; uniform float u_aspect;
+    uniform vec4 u_color; uniform vec2 u_point; uniform vec2 u_prev;
+    uniform float u_radius; uniform float u_segment;
+    out vec4 o;
+    float sdSeg(vec2 p, vec2 a, vec2 b) {
+      vec2 pa = p - a, ba = b - a;
+      float h = clamp(dot(pa, ba) / max(dot(ba, ba), 1e-6), 0.0, 1.0);
+      return length(pa - ba * h);
+    }
+    void main() {
+      vec2 p = v_uv; p.x *= u_aspect;
+      vec2 a = u_prev;  a.x *= u_aspect;
+      vec2 b = u_point; b.x *= u_aspect;
+      float d = mix(length(p - b), sdSeg(p, a, b), u_segment);
+      float s = exp(-d * d / max(u_radius, 1e-5));
+      vec4 base = texture(u_target, v_uv);
+      o = base + s * u_color;
+    }`;
+
+    var advectFrag = `#version 300 es
+    precision highp float;
+    in vec2 v_uv;
+    uniform sampler2D u_velocity; uniform sampler2D u_source;
+    uniform vec2 u_texel; uniform vec2 u_velTexel;
+    uniform float u_dt; uniform float u_dissipation;
+    out vec4 o;
+    void main() {
+      vec2 vel = texture(u_velocity, v_uv).xy;
+      vec2 coord = v_uv - u_dt * vel * u_velTexel;
+      vec4 result = texture(u_source, coord);
+      float decay = 1.0 + u_dissipation * u_dt;
+      o = result / decay;
+    }`;
+
+    var divergenceFrag = `#version 300 es
+    precision highp float;
+    in vec2 v_uv; in vec2 v_l; in vec2 v_r; in vec2 v_t; in vec2 v_b;
+    uniform sampler2D u_velocity; out vec4 o;
+    void main() {
+      float L = texture(u_velocity, v_l).x;
+      float R = texture(u_velocity, v_r).x;
+      float T = texture(u_velocity, v_t).y;
+      float B = texture(u_velocity, v_b).y;
+      vec2 c = texture(u_velocity, v_uv).xy;
+      if (v_l.x < 0.0) L = -c.x;
+      if (v_r.x > 1.0) R = -c.x;
+      if (v_t.y > 1.0) T = -c.y;
+      if (v_b.y < 0.0) B = -c.y;
+      float div = 0.5 * (R - L + T - B);
+      o = vec4(div, 0.0, 0.0, 1.0);
+    }`;
+
+    var curlFrag = `#version 300 es
+    precision highp float;
+    in vec2 v_uv; in vec2 v_l; in vec2 v_r; in vec2 v_t; in vec2 v_b;
+    uniform sampler2D u_velocity; out vec4 o;
+    void main() {
+      float L = texture(u_velocity, v_l).y;
+      float R = texture(u_velocity, v_r).y;
+      float T = texture(u_velocity, v_t).x;
+      float B = texture(u_velocity, v_b).x;
+      float c = R - L - T + B;
+      o = vec4(0.5 * c, 0.0, 0.0, 1.0);
+    }`;
+
+    var vorticityFrag = `#version 300 es
+    precision highp float;
+    in vec2 v_uv; in vec2 v_l; in vec2 v_r; in vec2 v_t; in vec2 v_b;
+    uniform sampler2D u_velocity; uniform sampler2D u_curl;
+    uniform float u_curlStrength; uniform float u_dt;
+    out vec4 o;
+    void main() {
+      float L = texture(u_curl, v_l).x;
+      float R = texture(u_curl, v_r).x;
+      float T = texture(u_curl, v_t).x;
+      float B = texture(u_curl, v_b).x;
+      float C = texture(u_curl, v_uv).x;
+      vec2 force = 0.5 * vec2(abs(T) - abs(B), abs(R) - abs(L));
+      force /= max(length(force), 1e-4);
+      force *= u_curlStrength * C;
+      force.y *= -1.0;
+      vec2 vel = texture(u_velocity, v_uv).xy;
+      vel += force * u_dt;
+      vel = clamp(vel, vec2(-1000.0), vec2(1000.0));
+      o = vec4(vel, 0.0, 1.0);
+    }`;
+
+    var pressureFrag = `#version 300 es
+    precision highp float;
+    in vec2 v_uv; in vec2 v_l; in vec2 v_r; in vec2 v_t; in vec2 v_b;
+    uniform sampler2D u_pressure; uniform sampler2D u_divergence;
+    out vec4 o;
+    void main() {
+      float L = texture(u_pressure, v_l).x;
+      float R = texture(u_pressure, v_r).x;
+      float T = texture(u_pressure, v_t).x;
+      float B = texture(u_pressure, v_b).x;
+      float D = texture(u_divergence, v_uv).x;
+      float p = (L + R + T + B - D) * 0.25;
+      o = vec4(p, 0.0, 0.0, 1.0);
+    }`;
+
+    var gradientFrag = `#version 300 es
+    precision highp float;
+    in vec2 v_uv; in vec2 v_l; in vec2 v_r; in vec2 v_t; in vec2 v_b;
+    uniform sampler2D u_pressure; uniform sampler2D u_velocity;
+    out vec4 o;
+    void main() {
+      float L = texture(u_pressure, v_l).x;
+      float R = texture(u_pressure, v_r).x;
+      float T = texture(u_pressure, v_t).x;
+      float B = texture(u_pressure, v_b).x;
+      vec2 v = texture(u_velocity, v_uv).xy;
+      v -= vec2(R - L, T - B);
+      o = vec4(v, 0.0, 1.0);
+    }`;
+
+    var renderFrag = `#version 300 es
+    precision highp float;
+    in vec2 v_uv;
+    uniform sampler2D u_dye; uniform sampler2D u_velocity;
+    uniform vec2 u_resolution; uniform vec2 u_dyeTexel; uniform float u_time;
+    out vec4 fragColor;
+    float hash21(vec2 p) {
+      p = fract(p * vec2(123.34, 456.21));
+      p += dot(p, p + 45.32);
+      return fract(p.x * p.y);
+    }
+    float vnoise(vec2 p) {
+      vec2 i = floor(p); vec2 f = fract(p);
+      float a = hash21(i);
+      float b = hash21(i + vec2(1.0, 0.0));
+      float c = hash21(i + vec2(0.0, 1.0));
+      float d = hash21(i + vec2(1.0, 1.0));
+      vec2 u = f * f * (3.0 - 2.0 * f);
+      return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+    }
+    vec3 thinFilm(float opd) {
+      const float PI = 3.14159265;
+      float r = cos(2.0 * PI * opd / 650.0);
+      float g = cos(2.0 * PI * opd / 550.0);
+      float b = cos(2.0 * PI * opd / 450.0);
+      vec3 c = vec3(r, g, b);
+      return c * c;
+    }
+    vec3 aces(vec3 x) {
+      const float a = 2.51, b = 0.03, c = 2.43, d = 0.59, e = 0.14;
+      return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
+    }
+    float fresnel(float cosTheta, float F0) {
+      float m = clamp(1.0 - cosTheta, 0.0, 1.0);
+      return F0 + (1.0 - F0) * pow(m, 5.0);
+    }
+    float ggx(float NdotH, float roughness) {
+      float a = roughness * roughness;
+      float a2 = a * a;
+      float d = (NdotH * NdotH) * (a2 - 1.0) + 1.0;
+      return a2 / (3.14159265 * d * d);
+    }
+    void main() {
+      vec2 uv = v_uv;
+      vec2 e = u_dyeTexel;
+      float hC = clamp(texture(u_dye, uv).a, 0.0, 1.5);
+      float hL = clamp(texture(u_dye, uv - vec2(e.x, 0.0)).a, 0.0, 1.5);
+      float hR = clamp(texture(u_dye, uv + vec2(e.x, 0.0)).a, 0.0, 1.5);
+      float hT = clamp(texture(u_dye, uv + vec2(0.0, e.y)).a, 0.0, 1.5);
+      float hB = clamp(texture(u_dye, uv - vec2(0.0, e.y)).a, 0.0, 1.5);
+      float heightScale = 60.0;
+      vec3 n = normalize(vec3((hL - hR) * heightScale, (hB - hT) * heightScale, 1.0));
+      vec3 V = vec3(0.0, 0.0, 1.0);
+      vec3 L1 = normalize(vec3(0.45, 0.55, 0.85));
+      vec3 L2 = normalize(vec3(-0.6, -0.3, 0.7));
+      float NdotV = clamp(dot(n, V), 0.0, 1.0);
+      vec3 H1 = normalize(L1 + V); vec3 H2 = normalize(L2 + V);
+      float spec1 = ggx(clamp(dot(n, H1), 0.0, 1.0), 0.18);
+      float spec2 = ggx(clamp(dot(n, H2), 0.0, 1.0), 0.32);
+      vec3 R = reflect(-V, n);
+      vec2 envUV = uv + R.xy * 0.08;
+      float envY = clamp(envUV.y, 0.0, 1.0);
+      vec3 envCool = vec3(0.002, 0.004, 0.007);
+      vec3 envWarm = vec3(0.008, 0.007, 0.005);
+      vec3 env = mix(envCool, envWarm, smoothstep(0.0, 1.0, envY));
+      float F = fresnel(NdotV, 0.012);
+      float thickness = 1800.0 * hC;
+      thickness += 12.0 * vnoise(uv * 6.0 + u_time * 0.05) * hC;
+      float opd = thickness * (2.0 * NdotV);
+      vec3 iri = thinFilm(opd);
+      float iriMask = smoothstep(0.02, 0.35, hC);
+      vec2 vel = texture(u_velocity, uv).xy;
+      float speed = length(vel);
+      vec2 vdir = speed > 1e-4 ? vel / speed : vec2(0.0, 1.0);
+      float aniso = abs(dot(n.xy, vec2(-vdir.y, vdir.x)));
+      float streak = pow(aniso, 6.0) * smoothstep(0.0, 8.0, speed);
+      vec3 base = vec3(0.0008, 0.0012, 0.0020);
+      vec3 col = base;
+      col = mix(col, env, F * 0.30);
+      col += iri * iriMask * (0.45 + 0.55 * F) * 0.85;
+      col += vec3(1.1, 1.05, 0.95) * spec1 * (0.5 + 0.5 * F) * iriMask;
+      col += vec3(0.85, 0.9, 1.05) * spec2 * (0.35 + 0.45 * F) * iriMask;
+      col += streak * vec3(0.7, 0.65, 0.55) * 0.18 * iriMask;
+      vec2 q = uv - 0.5;
+      float vig = smoothstep(0.85, 0.15, length(q));
+      col *= mix(0.45, 1.0, vig);
+      float ca = clamp(speed * 0.0015, 0.0, 0.004);
+      if (ca > 0.0001) {
+        float rC = texture(u_dye, uv + vec2(ca, 0.0)).a;
+        float bC = texture(u_dye, uv - vec2(ca, 0.0)).a;
+        col.r += (rC - hC) * 0.10;
+        col.b += (bC - hC) * 0.10;
+      }
+      col = aces(col * 0.85);
+      col = pow(col, vec3(1.0 / 2.2));
+      col = max(col - vec3(0.008), vec3(0.0));
+      float grain = (hash21(gl_FragCoord.xy + fract(u_time) * 17.31) - 0.5) * 0.012;
+      col += grain;
+      fragColor = vec4(col, 1.0);
+    }`;
+
+    function compile(src, type) {
+      var sh = gl.createShader(type);
+      gl.shaderSource(sh, src);
+      gl.compileShader(sh);
+      if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+        console.error("[oil] shader compile error:", gl.getShaderInfoLog(sh));
+      }
+      return sh;
+    }
+    function program(vsSrc, fsSrc) {
+      var vs = compile(vsSrc, gl.VERTEX_SHADER);
+      var fs = compile(fsSrc, gl.FRAGMENT_SHADER);
+      var p = gl.createProgram();
+      gl.attachShader(p, vs); gl.attachShader(p, fs);
+      gl.bindAttribLocation(p, 0, "a_pos");
+      gl.linkProgram(p);
+      if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
+        console.error("[oil] program link error:", gl.getProgramInfoLog(p));
+      }
+      var u = {};
+      var n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+      for (var i = 0; i < n; i++) {
+        var info = gl.getActiveUniform(p, i);
+        if (!info) continue;
+        u[info.name] = gl.getUniformLocation(p, info.name);
+      }
+      return { p: p, u: u };
+    }
+
+    var quadBuf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+    var vao = gl.createVertexArray();
+    gl.bindVertexArray(vao);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+    gl.bindVertexArray(null);
+
+    var progs = {
+      copy: program(baseVert, copyFrag),
+      clear: program(baseVert, clearFrag),
+      splat: program(baseVert, splatFrag),
+      advect: program(baseVert, advectFrag),
+      divergence: program(baseVert, divergenceFrag),
+      curl: program(baseVert, curlFrag),
+      vorticity: program(baseVert, vorticityFrag),
+      pressure: program(baseVert, pressureFrag),
+      gradient: program(baseVert, gradientFrag),
+      render: program(baseVert, renderFrag),
+    };
+
+    function createFBO(w, h, internal, format, type, filter) {
+      var tex = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, tex);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texImage2D(gl.TEXTURE_2D, 0, internal, w, h, 0, format, type, null);
+      var fbo = gl.createFramebuffer();
+      gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+      gl.viewport(0, 0, w, h);
+      gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT);
+      return {
+        tex: tex, fbo: fbo, w: w, h: h,
+        texelX: 1 / w, texelY: 1 / h,
+        attach: function (id) { gl.activeTexture(gl.TEXTURE0 + id); gl.bindTexture(gl.TEXTURE_2D, tex); return id; },
+      };
+    }
+    function createDouble(w, h, internal, format, type, filter) {
+      var a = createFBO(w, h, internal, format, type, filter);
+      var b = createFBO(w, h, internal, format, type, filter);
+      return {
+        get read() { return a; },
+        get write() { return b; },
+        swap: function () { var t = a; a = b; b = t; },
+        w: w, h: h, texelX: 1 / w, texelY: 1 / h,
+      };
+    }
+
+    var SIM_RES = 256, DYE_RES = 1024;
+    var velocity, dye, pressure, divergenceFbo, curlFbo;
+    var dprWidth = 0, dprHeight = 0;
+
+    function getRes(target, w, h) {
+      var ar = w / h;
+      if (ar > 1) return { w: Math.round(target * ar), h: target };
+      return { w: target, h: Math.round(target / ar) };
+    }
+    function initFBOs() {
+      var rect = canvas.getBoundingClientRect();
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dprWidth = Math.max(1, Math.floor(rect.width * dpr));
+      dprHeight = Math.max(1, Math.floor(rect.height * dpr));
+      canvas.width = dprWidth; canvas.height = dprHeight;
+      var sim = getRes(SIM_RES, dprWidth, dprHeight);
+      var dyeR = getRes(DYE_RES, dprWidth, dprHeight);
+      var filter = linearFloat ? gl.LINEAR : gl.NEAREST;
+      velocity = createDouble(sim.w, sim.h, gl.RG16F, gl.RG, gl.HALF_FLOAT, filter);
+      dye = createDouble(dyeR.w, dyeR.h, gl.RGBA16F, gl.RGBA, gl.HALF_FLOAT, filter);
+      pressure = createDouble(sim.w, sim.h, gl.R16F, gl.RED, gl.HALF_FLOAT, gl.NEAREST);
+      divergenceFbo = createFBO(sim.w, sim.h, gl.R16F, gl.RED, gl.HALF_FLOAT, gl.NEAREST);
+      curlFbo = createFBO(sim.w, sim.h, gl.R16F, gl.RED, gl.HALF_FLOAT, gl.NEAREST);
+    }
+    initFBOs();
+
+    function blit(target) {
+      if (target) { gl.viewport(0, 0, target.w, target.h); gl.bindFramebuffer(gl.FRAMEBUFFER, target.fbo); }
+      else { gl.viewport(0, 0, dprWidth, dprHeight); gl.bindFramebuffer(gl.FRAMEBUFFER, null); }
+      gl.bindVertexArray(vao);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
+
+    var pointer = { x: 0.5, y: 0.5, px: 0.5, py: 0.5, dx: 0, dy: 0, moved: false, smoothSpeed: 0 };
+
+    function updatePointer(clientX, clientY) {
+      var rect = canvas.getBoundingClientRect();
+      var nx = (clientX - rect.left) / rect.width;
+      var ny = 1.0 - (clientY - rect.top) / rect.height;
+      pointer.px = pointer.x; pointer.py = pointer.y;
+      pointer.x = nx; pointer.y = ny;
+      pointer.dx = nx - pointer.px; pointer.dy = ny - pointer.py;
+      pointer.moved = true;
+    }
+    // Listen on window so the slider on top doesn't block movement.
+    window.addEventListener("pointermove", function (e) { updatePointer(e.clientX, e.clientY); }, { passive: true });
+
+    var ro = new ResizeObserver(function () { initFBOs(); });
+    ro.observe(canvas);
+
+    var visible = !document.hidden;
+    document.addEventListener("visibilitychange", function () { visible = !document.hidden; });
+
+    function splat(target, x, y, px, py, color, radius, asSegment) {
+      var pp = progs.splat;
+      gl.useProgram(pp.p);
+      gl.uniform1i(pp.u["u_target"], target.read.attach(0));
+      gl.uniform1f(pp.u["u_aspect"], target.w / target.h);
+      gl.uniform2f(pp.u["u_point"], x, y);
+      gl.uniform2f(pp.u["u_prev"], px, py);
+      gl.uniform4f(pp.u["u_color"], color[0], color[1], color[2], color[3]);
+      gl.uniform1f(pp.u["u_radius"], radius);
+      gl.uniform1f(pp.u["u_segment"], asSegment ? 1.0 : 0.0);
+      blit(target.write);
+      target.swap();
+    }
+
+    function applyPointerSplats() {
+      var dx = pointer.dx, dy = pointer.dy;
+      var dlen = Math.hypot(dx, dy);
+      if (dlen < 1e-5) return;
+      pointer.smoothSpeed = pointer.smoothSpeed * 0.7 + dlen * 0.3;
+      var s = pointer.smoothSpeed;
+      var speedBoost = 1.0 + Math.min(s * 140.0, 22.0);
+      var splatVx = dx * 4500.0 * speedBoost;
+      var splatVy = dy * 4500.0 * speedBoost;
+      var dyeAmount = Math.min(0.18 + s * 8.0, 1.4);
+      var baseR = 0.00026;
+      var radius = baseR * (1.0 + Math.min(s * 18.0, 3.5));
+      splat(velocity, pointer.x, pointer.y, pointer.px, pointer.py, [splatVx, splatVy, 0, 0], radius, true);
+      splat(dye, pointer.x, pointer.y, pointer.px, pointer.py, [dyeAmount * 0.06, dyeAmount * 0.07, dyeAmount * 0.08, dyeAmount], radius * 1.15, true);
+      pointer.px = pointer.x; pointer.py = pointer.y;
+      pointer.dx = 0; pointer.dy = 0;
+    }
+
+    var idleT = 0;
+    function idleDrift(dt) {
+      idleT += dt;
+      if (pointer.moved) return;
+      var cx = 0.5 + 0.22 * Math.sin(idleT * 0.31);
+      var cy = 0.5 + 0.22 * Math.cos(idleT * 0.24);
+      var px = 0.5 + 0.22 * Math.sin((idleT - dt) * 0.31);
+      var py = 0.5 + 0.22 * Math.cos((idleT - dt) * 0.24);
+      var dx = cx - px, dy = cy - py;
+      splat(velocity, cx, cy, px, py, [dx * 2200, dy * 2200, 0, 0], 0.0004, true);
+      splat(dye, cx, cy, px, py, [0.004, 0.005, 0.006, 0.08], 0.0005, true);
+    }
+
+    var last = performance.now();
+    var startTime = performance.now();
+    var VELOCITY_DISSIPATION = 0.6;
+    var DYE_DISSIPATION = 1.2;
+    var PRESSURE_ITERATIONS = 24;
+    var CURL_STRENGTH = 22.0;
+
+    function step(dt) {
+      var pp;
+      pp = progs.curl; gl.useProgram(pp.p);
+      gl.uniform2f(pp.u["u_texel"], velocity.texelX, velocity.texelY);
+      gl.uniform1i(pp.u["u_velocity"], velocity.read.attach(0));
+      blit(curlFbo);
+
+      pp = progs.vorticity; gl.useProgram(pp.p);
+      gl.uniform2f(pp.u["u_texel"], velocity.texelX, velocity.texelY);
+      gl.uniform1i(pp.u["u_velocity"], velocity.read.attach(0));
+      gl.uniform1i(pp.u["u_curl"], curlFbo.attach(1));
+      gl.uniform1f(pp.u["u_curlStrength"], CURL_STRENGTH);
+      gl.uniform1f(pp.u["u_dt"], dt);
+      blit(velocity.write); velocity.swap();
+
+      pp = progs.divergence; gl.useProgram(pp.p);
+      gl.uniform2f(pp.u["u_texel"], velocity.texelX, velocity.texelY);
+      gl.uniform1i(pp.u["u_velocity"], velocity.read.attach(0));
+      blit(divergenceFbo);
+
+      pp = progs.clear; gl.useProgram(pp.p);
+      gl.uniform1i(pp.u["u_tex"], pressure.read.attach(0));
+      gl.uniform1f(pp.u["u_value"], 0.8);
+      blit(pressure.write); pressure.swap();
+
+      pp = progs.pressure; gl.useProgram(pp.p);
+      gl.uniform2f(pp.u["u_texel"], pressure.texelX, pressure.texelY);
+      for (var i = 0; i < PRESSURE_ITERATIONS; i++) {
+        gl.uniform1i(pp.u["u_pressure"], pressure.read.attach(0));
+        gl.uniform1i(pp.u["u_divergence"], divergenceFbo.attach(1));
+        blit(pressure.write); pressure.swap();
+      }
+
+      pp = progs.gradient; gl.useProgram(pp.p);
+      gl.uniform2f(pp.u["u_texel"], velocity.texelX, velocity.texelY);
+      gl.uniform1i(pp.u["u_pressure"], pressure.read.attach(0));
+      gl.uniform1i(pp.u["u_velocity"], velocity.read.attach(1));
+      blit(velocity.write); velocity.swap();
+
+      pp = progs.advect; gl.useProgram(pp.p);
+      gl.uniform2f(pp.u["u_texel"], velocity.texelX, velocity.texelY);
+      gl.uniform2f(pp.u["u_velTexel"], velocity.texelX, velocity.texelY);
+      gl.uniform1i(pp.u["u_velocity"], velocity.read.attach(0));
+      gl.uniform1i(pp.u["u_source"], velocity.read.attach(0));
+      gl.uniform1f(pp.u["u_dt"], dt);
+      gl.uniform1f(pp.u["u_dissipation"], VELOCITY_DISSIPATION);
+      blit(velocity.write); velocity.swap();
+
+      pp = progs.advect; gl.useProgram(pp.p);
+      gl.uniform2f(pp.u["u_texel"], dye.texelX, dye.texelY);
+      gl.uniform2f(pp.u["u_velTexel"], velocity.texelX, velocity.texelY);
+      gl.uniform1i(pp.u["u_velocity"], velocity.read.attach(0));
+      gl.uniform1i(pp.u["u_source"], dye.read.attach(1));
+      gl.uniform1f(pp.u["u_dt"], dt);
+      gl.uniform1f(pp.u["u_dissipation"], DYE_DISSIPATION);
+      blit(dye.write); dye.swap();
+    }
+
+    function render() {
+      var pp = progs.render; gl.useProgram(pp.p);
+      gl.uniform1i(pp.u["u_dye"], dye.read.attach(0));
+      gl.uniform1i(pp.u["u_velocity"], velocity.read.attach(1));
+      gl.uniform2f(pp.u["u_resolution"], dprWidth, dprHeight);
+      gl.uniform2f(pp.u["u_dyeTexel"], dye.texelX, dye.texelY);
+      gl.uniform1f(pp.u["u_time"], (performance.now() - startTime) / 1000);
+      blit(null);
+    }
+
+    function frame() {
+      var now = performance.now();
+      var dt = (now - last) / 1000; last = now;
+      if (dt > 0.05) dt = 0.05;
+      if (visible) { idleDrift(dt); applyPointerSplats(); step(dt); render(); }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  })();
+  </script>
+</body>
+</html>

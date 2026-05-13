@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact — Artista Ent.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=Allura&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
+  <style>
+    body.page-contact { background: #000; color: #fff; }
+    .contact-standalone {
+      min-height: 100vh;
+      padding: calc(var(--nav-h) + 60px) var(--pad-x) 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    .contact-standalone .contact-bg {
+      position: absolute; inset: 0; background-size: cover; background-position: center 25%;
+      background-image: url('images/gg1.png');
+      filter: saturate(0.95) contrast(1.04);
+    }
+    .contact-standalone .contact-veil {
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.55) 35%, rgba(0,0,0,0.1) 70%, rgba(0,0,0,0.0) 100%);
+    }
+    .contact-standalone .contact-grid { position: relative; z-index: 2; }
+  </style>
+</head>
+<body class="page-contact">
+  <a href="index.html" class="nav-logo" aria-label="Artista Ent. — Home">
+    <img src="images/artista-1.png" alt="Artista Ent." class="nav-logo__img">
+  </a>
+  <header class="site-nav" id="siteNav">
+    <nav class="nav-center" aria-label="Primary">
+      <ul>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="gallery.html">Services</a></li>
+        <li><a href="work.html">Gallery</a></li>
+        <li><a href="contact.html" class="is-active">Contact Us</a></li>
+      </ul>
+    </nav>
+    <button class="nav-menu" aria-label="Open menu">
+      <span class="nav-menu__label">Menu</span>
+      <span class="nav-menu__icon"><i></i><i></i></span>
+    </button>
+  </header>
+
+  <main class="contact-standalone">
+    <div class="contact-bg"></div>
+    <div class="contact-veil"></div>
+    <div class="contact-grid">
+      <div class="contact-text reveal">
+        <span class="eyebrow eyebrow--light">CONTACT US</span>
+        <h2 class="display-xl">LET'S CREATE<br/>SOMETHING ICONIC.</h2>
+        <span class="hr-rule hr-rule--light"></span>
+        <h4 class="contact-subhead">LOOKING TO WORK WITH US?</h4>
+        <p class="lede">Let's take your brand to the next level with marketing people love.</p>
+        <ul class="contact-list">
+          <li>
+            <a href="mailto:contact@artistaent.com" class="contact-list__row">
+              <span class="contact-list__label">MAIL</span>
+              <span class="contact-list__value">CONTACT@ARTISTAENT.COM</span>
+              <svg class="contact-list__arrow" viewBox="0 0 40 12"><path d="M0 6h36M30 1l5 5-5 5" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>
+            </a>
+          </li>
+          <li>
+            <a href="https://www.instagram.com/artistaentertainment?utm_source=ig_web_button_share_sheet&amp;igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" class="contact-list__row">
+              <span class="contact-list__label">FOLLOW</span>
+              <span class="contact-list__value">INSTAGRAM</span>
+              <svg class="contact-list__arrow" viewBox="0 0 40 12"><path d="M0 6h36M30 1l5 5-5 5" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>
+            </a>
+          </li>
+          <li>
+            <a href="https://www.linkedin.com/company/artista-entertainment" target="_blank" rel="noopener noreferrer" class="contact-list__row">
+              <span class="contact-list__label">CONNECT</span>
+              <span class="contact-list__value">LINKEDIN</span>
+              <svg class="contact-list__arrow" viewBox="0 0 40 12"><path d="M0 6h36M30 1l5 5-5 5" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <footer class="site-footer site-footer--home">
+      <span>COPYRIGHT ©2022 ARTISTA ENT.</span>
+    </footer>
+  </main>
+
+  <script src="js/script.js" defer></script>
+</body>
+</html>
