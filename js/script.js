@@ -327,8 +327,8 @@
   const links = [
     { href: "index.html",   label: "Home" },
     { href: "about.html",   label: "About Us" },
-    { href: "gallery.html", label: "Services" },
-    { href: "work.html",    label: "Gallery" },
+    { href: "services.html", label: "Services" },
+    { href: "gallery.html",    label: "Gallery" },
     { href: "contact.html", label: "Contact Us" },
   ];
 

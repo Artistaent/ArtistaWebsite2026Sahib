@@ -363,7 +363,7 @@ ul { list-style: none; }
 }
 .hero-text {
   position: static;
-  padding-top: 0;
+  padding-top: clamp(40px, 8vh, 110px);
 }
 .brand-mega .line {
   display: block;
@@ -418,11 +418,10 @@ iframe.visual-frame__media {
   background: #000;
   pointer-events: none;
 }
-/* Hero frame: scale up the Vimeo iframe so the player's letterbox bars
-   are pushed outside the rounded card boundary and clipped by the
-   frame's overflow:hidden. Video fills the box, sides cropped. */
+/* Hero frame: keep the Vimeo iframe at the natural, zoomed-out scale
+   at all times (matching the previous hover-state appearance). */
 .visual-frame--hero iframe.visual-frame__media {
-  transform: scale(1.85);
+  transform: scale(1.08);
   transform-origin: center center;
 }
 .visual-frame:hover .visual-frame__media { transform: scale(1.08); }
@@ -1278,16 +1277,16 @@ iframe.visual-frame__media {
     align-items: stretch;
   }
   .hero-visual { order: -1; display: flex; justify-content: center; }
-  /* Match desktop frame aspect + keep the scale(1.85) zoom so the
-     Vimeo hero video fills the box edge-to-edge regardless of its
-     native 16:9 / 9:16 orientation. NO black borders. */
+  /* Match desktop frame aspect + keep the (now zoomed-out) scale so the
+     Vimeo hero video renders at its natural fit regardless of its
+     native 16:9 / 9:16 orientation. */
   .visual-frame--hero {
     aspect-ratio: 1.05 / 1;
     max-width: 420px;
     width: 92%;
     border-radius: 24px;
   }
-  /* (transform: scale(1.85) inherited from the desktop rule applies here too) */
+  /* (transform: scale(1.08) inherited from the desktop rule applies here too) */
 
   /* ===== SEC-ABOUT — dedicated simple mobile layout =====
      Rebuilt from scratch for mobile as a clean block-level dark panel.
@@ -1527,7 +1526,7 @@ iframe.visual-frame__media {
     animation-duration: 32s;
   }
 
-  /* ===== SERVICES (gallery.html) — simplified mobile stack =====
+  /* ===== SERVICES (services.html) — simplified mobile stack =====
      Text first, video below. Each service block is a clean self-contained
      unit. Aggressive force-visible on the video so it always renders. */
   .gallery-page {
@@ -1616,7 +1615,7 @@ iframe.visual-frame__media {
   .cta-bar__text h4 { font-size: 15px; }
   .btn-outline { padding: 14px 22px; font-size: 12px; }
 
-  /* ===== GALLERY (work.html) slider — touch-friendly ===== */
+  /* ===== GALLERY (gallery.html) slider — touch-friendly ===== */
   .tm-card { width: 92%; max-width: none; }
   .tm-hint { font-size: 10px; bottom: 18px; letter-spacing: 0.18em; }
 
@@ -1707,7 +1706,7 @@ body.over-video #cursor-blob { opacity: 0; }
 /* ---- Extended hide rules ----
    The cursor blob never shows on top of an image or video surface.
    Also hidden site-wide on the standalone Contact page (full-bleed
-   bg image) and the Gallery slider page (work.html — contains the
+   bg image) and the Gallery slider page (gallery.html — contains the
    Time Machine slider stage at #tm-stage). */
 body.page-contact #cursor-blob,
 body:has(#tm-stage) #cursor-blob {

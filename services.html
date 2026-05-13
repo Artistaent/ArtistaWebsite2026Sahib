@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Services — Artista Ent.</title>
+  <meta name="description" content="The services Artista Ent. delivers — production, creative strategy, campaigns, photography, social &amp; UGC." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=Allura&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" type="image/png" href="images/artista-1.png" />
+  <link rel="shortcut icon" type="image/png" href="images/artista-1.png" />
+  <link rel="apple-touch-icon" href="images/artista-1.png" />
+  <script>
+    // Strip .html from the URL bar for a cleaner address (services.html -> services, index.html -> /)
+    (function () {
+      try {
+        var path = window.location.pathname;
+        var m = path.match(/^(.*\/)([A-Za-z0-9_-]+)\.html$/);
+        if (m) {
+          var newPath = m[2].toLowerCase() === 'index' ? m[1] : (m[1] + m[2]);
+          window.history.replaceState(null, '', newPath + window.location.search + window.location.hash);
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
+</head>
+<body class="page-gallery">
+
+  <!-- ============== PERSISTENT NAVIGATION ============== -->
+  <a href="index.html" class="nav-logo" aria-label="Artista Ent. — Home">
+    <img src="images/artista-1.png" alt="Artista Ent." class="nav-logo__img">
+  </a>
+  <header class="site-nav site-nav--light" id="siteNav">
+    <nav class="nav-center" aria-label="Primary">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="services.html" class="is-active">Services</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="contact.html">Contact Us</a></li>
+      </ul>
+    </nav>
+    <button class="nav-menu" aria-label="Open menu">
+      <span class="nav-menu__label">Menu</span>
+      <span class="nav-menu__icon"><i></i><i></i></span>
+    </button>
+  </header>
+
+  <main class="gallery-page">
+
+    <!-- ===== SERVICE BLOCKS (alternating) ===== -->
+    <section class="services">
+
+      <article class="service-row reveal">
+        <div class="service-text">
+          <span class="service-num">01 / PRODUCTION</span>
+          <h3 class="display-md"><span class="split-chars" data-split-chars>END-TO-END VIDEO PRODUCTION</span></h3>
+          <p>From concept to final delivery, we handle every stage of production with precision — ensuring every frame serves a purpose.</p>
+        </div>
+        <div class="service-media">
+          <div class="visual-frame">
+            <iframe class="visual-frame__media visual-frame__media--vimeo"
+                    src="https://player.vimeo.com/video/701383950?autoplay=1&loop=1&muted=1&background=1&dnt=1"
+                    title="End-to-end video production reel"
+                    frameborder="0"
+                    allow="autoplay; fullscreen; picture-in-picture"
+                    allowfullscreen
+                    loading="lazy"></iframe>
+            <a href="https://vimeo.com/701383950?fl=pl&fe=sh" target="_blank" rel="noopener noreferrer" class="play-btn" aria-label="Watch reel on Vimeo">
+              <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <article class="service-row service-row--reverse reveal">
+        <div class="service-media">
+          <div class="visual-frame">
+            <iframe class="visual-frame__media visual-frame__media--vimeo"
+                    src="https://player.vimeo.com/video/1064538726?autoplay=1&loop=1&muted=1&background=1&dnt=1"
+                    title="Strategy that drives impact"
+                    frameborder="0"
+                    allow="autoplay; fullscreen; picture-in-picture"
+                    allowfullscreen
+                    loading="lazy"></iframe>
+            <a href="https://vimeo.com/1064538726?fl=pl&fe=sh" target="_blank" rel="noopener noreferrer" class="play-btn" aria-label="Watch reel on Vimeo">
+              <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="service-text">
+          <span class="service-num">02 / CREATIVE STRATEGY</span>
+          <h3 class="display-md"><span class="split-chars" data-split-chars>STRATEGY THAT DRIVES IMPACT</span></h3>
+          <p>We develop data-driven creative strategies that connect your brand with the right audience and drive real results.</p>
+        </div>
+      </article>
+
+      <article class="service-row reveal">
+        <div class="service-text">
+          <span class="service-num">03 / CAMPAIGN DEVELOPMENT</span>
+          <h3 class="display-md"><span class="split-chars" data-split-chars>CAMPAIGNS BUILT TO CONVERT</span></h3>
+          <p>From ideation to execution, we create campaigns that not only capture attention but also convert and scale.</p>
+        </div>
+        <div class="service-media">
+          <div class="visual-frame">
+            <iframe class="visual-frame__media visual-frame__media--vimeo"
+                    src="https://player.vimeo.com/video/1064474316?autoplay=1&loop=1&muted=1&background=1&dnt=1"
+                    title="Campaigns built to convert"
+                    frameborder="0"
+                    allow="autoplay; fullscreen; picture-in-picture"
+                    allowfullscreen
+                    loading="lazy"></iframe>
+            <a href="https://vimeo.com/1064474316?fl=pl&fe=sh" target="_blank" rel="noopener noreferrer" class="play-btn" aria-label="Watch reel on Vimeo">
+              <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <article class="service-row service-row--reverse reveal">
+        <div class="service-media">
+          <div class="visual-frame">
+            <iframe class="visual-frame__media visual-frame__media--vimeo"
+                    src="https://player.vimeo.com/video/1160273113?autoplay=1&loop=1&muted=1&background=1&dnt=1"
+                    title="Visuals that elevate brands"
+                    frameborder="0"
+                    allow="autoplay; fullscreen; picture-in-picture"
+                    allowfullscreen
+                    loading="lazy"></iframe>
+            <a href="https://vimeo.com/1160273113?fl=pl&fe=sh" target="_blank" rel="noopener noreferrer" class="play-btn" aria-label="Watch reel on Vimeo">
+              <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="service-text">
+          <span class="service-num">04 / PHOTOGRAPHY</span>
+          <h3 class="display-md"><span class="split-chars" data-split-chars>VISUALS THAT ELEVATE BRANDS</span></h3>
+          <p>High-impact photography that tells your brand story and creates a lasting impression.</p>
+        </div>
+      </article>
+
+      <article class="service-row reveal">
+        <div class="service-text">
+          <span class="service-num">05 / SOCIAL & UGC</span>
+          <h3 class="display-md"><span class="split-chars" data-split-chars>CONTENT FOR EVERY PLATFORM</span></h3>
+          <p>Authentic UGC and social-first content designed to engage, build trust, and drive action.</p>
+        </div>
+        <div class="service-media">
+          <div class="visual-frame">
+            <iframe class="visual-frame__media visual-frame__media--vimeo"
+                    src="https://player.vimeo.com/video/1152070028?autoplay=1&loop=1&muted=1&background=1&dnt=1"
+                    title="Content for every platform"
+                    frameborder="0"
+                    allow="autoplay; fullscreen; picture-in-picture"
+                    allowfullscreen
+                    loading="lazy"></iframe>
+            <a href="https://vimeo.com/1152070028?fl=pl&fe=sh" target="_blank" rel="noopener noreferrer" class="play-btn" aria-label="Watch reel on Vimeo">
+              <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+
+    </section>
+
+    <!-- ===== TAGLINE BAR ===== -->
+    <section class="tagline-bar">
+      <span class="tagline-bar__rule reveal"></span>
+      <h3 class="display-md">
+        <span class="split-chars" data-split-chars>WE CREATE WORK THAT PERFORMS</span><br/>
+        <span class="split-chars" data-split-chars style="--stagger-base: 0.55s;">— NOT JUST IMPRESSES.</span>
+      </h3>
+      <span class="tagline-bar__rule reveal"></span>
+    </section>
+
+    <!-- ===== CTA FOOTER ===== -->
+    <section class="cta-bar reveal">
+      <div class="cta-bar__text">
+        <h4>READY TO BUILD SOMETHING THAT PERFORMS?</h4>
+        <p>Let's create content that drives real results for your brand.</p>
+      </div>
+      <a href="contact.html" class="btn-outline">
+        <span>START A PROJECT</span>
+        <svg viewBox="0 0 40 12" aria-hidden="true"><path d="M0 6h36M30 1l5 5-5 5" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>
+      </a>
+    </section>
+
+  </main>
+
+  <script src="js/script.js" defer></script>
+</body>
+</html>

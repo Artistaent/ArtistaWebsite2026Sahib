@@ -8,6 +8,22 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=Allura&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" type="image/png" href="images/artista-1.png" />
+  <link rel="shortcut icon" type="image/png" href="images/artista-1.png" />
+  <link rel="apple-touch-icon" href="images/artista-1.png" />
+  <script>
+    // Strip .html from the URL bar for a cleaner address (contact.html -> contact, index.html -> /)
+    (function () {
+      try {
+        var path = window.location.pathname;
+        var m = path.match(/^(.*\/)([A-Za-z0-9_-]+)\.html$/);
+        if (m) {
+          var newPath = m[2].toLowerCase() === 'index' ? m[1] : (m[1] + m[2]);
+          window.history.replaceState(null, '', newPath + window.location.search + window.location.hash);
+        }
+      } catch (e) {}
+    })();
+  </script>
   <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
   <style>
     body.page-contact { background: #000; color: #fff; }
@@ -36,9 +52,10 @@
   <header class="site-nav" id="siteNav">
     <nav class="nav-center" aria-label="Primary">
       <ul>
+        <li><a href="index.html">Home</a></li>
         <li><a href="about.html">About Us</a></li>
-        <li><a href="gallery.html">Services</a></li>
-        <li><a href="work.html">Gallery</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
         <li><a href="contact.html" class="is-active">Contact Us</a></li>
       </ul>
     </nav>
