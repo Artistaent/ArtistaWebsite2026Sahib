@@ -79,17 +79,15 @@
           <div class="hero-visual" data-parallax="0.06">
             <div class="visual-frame visual-frame--hero fade-img">
               <div class="fade-img__inner" style="position:absolute;inset:0;">
-                <iframe class="visual-frame__media visual-frame__media--vimeo"
-                        src="https://player.vimeo.com/video/1191702478?autoplay=1&loop=1&muted=1&background=1&dnt=1"
-                        title="Artista Ent. hero reel"
-                        frameborder="0"
-                        allow="autoplay; fullscreen; picture-in-picture"
-                        allowfullscreen
-                        loading="lazy"></iframe>
+                <video class="visual-frame__media"
+                       src="videos/v3.mp4"
+                       autoplay
+                       loop
+                       muted
+                       playsinline
+                       preload="metadata"
+                       aria-hidden="true"></video>
               </div>
-              <a href="https://vimeo.com/1191702478?fl=pl&fe=sh" target="_blank" rel="noopener noreferrer" class="play-btn play-btn--lg" aria-label="Watch reel on Vimeo">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
-              </a>
             </div>
           </div>
         </div>
@@ -98,14 +96,14 @@
 
     <!-- ===== SECTION 2 — FULL-BLEED VIDEO ===== -->
     <section class="cinema-section sec-video" data-section="video" data-theme="dark">
-      <iframe class="sec-video__media"
-              src="https://player.vimeo.com/video/1189513043?autoplay=1&loop=1&muted=1&background=1&dnt=1"
-              title="Artista Ent. — full-bleed reel"
-              frameborder="0"
-              allow="autoplay; fullscreen; picture-in-picture"
-              allowfullscreen
-              loading="lazy"
-              aria-hidden="true"></iframe>
+      <video class="sec-video__media"
+             src="videos/v2.mp4"
+             autoplay
+             loop
+             muted
+             playsinline
+             preload="metadata"
+             aria-hidden="true"></video>
     </section>
 
     <!-- ===== SECTION 3 — ABOUT / INTRO ===== -->
@@ -130,17 +128,15 @@
           <div class="about-visual" data-parallax="0.08">
             <div class="visual-frame visual-frame--about fade-img">
               <div class="fade-img__inner" style="position:absolute;inset:0;">
-                <iframe class="visual-frame__media visual-frame__media--vimeo"
-                        src="https://player.vimeo.com/video/1064533432?autoplay=1&loop=1&muted=1&background=1&dnt=1"
-                        title="Artista Ent. reel"
-                        frameborder="0"
-                        allow="autoplay; fullscreen; picture-in-picture"
-                        allowfullscreen
-                        loading="lazy"></iframe>
+                <video class="visual-frame__media"
+                       src="videos/v4.mp4"
+                       autoplay
+                       loop
+                       muted
+                       playsinline
+                       preload="metadata"
+                       aria-hidden="true"></video>
               </div>
-              <a href="https://vimeo.com/1064533432?fl=pl&fe=sh" target="_blank" rel="noopener noreferrer" class="play-btn" aria-label="Watch reel on Vimeo">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
-              </a>
             </div>
           </div>
         </div>
@@ -283,5 +279,75 @@
   </main>
 
   <script src="js/script.js" defer></script>
+
+  <!-- ============================================================
+       MOBILE-ONLY: lazy-load below-hero media so it doesn't autoplay
+       4 videos on page load. Desktop is untouched.
+       - Poster image shown until the section nears the viewport.
+       - Original src is restored when within 250px of viewport.
+       ============================================================ -->
+  <script>
+    (function () {
+      var mq = window.matchMedia('(max-width: 820px)');
+      if (!mq.matches) return;
+      if (!('IntersectionObserver' in window)) return;
+
+      var targets = [
+        { sel: '.sec-video video.sec-video__media',
+          poster: 'images/v2-poster.jpg', parentSel: '.sec-video' },
+        { sel: '.sec-about video.visual-frame__media',
+          poster: 'images/v4-poster.jpg', parentSel: '.sec-about .fade-img__inner' },
+        { sel: '.sec-work .work-card:nth-of-type(1) iframe',
+          poster: 'https://vumbnail.com/1160273113.jpg', parentSel: '.sec-work .work-card:nth-of-type(1)' },
+        { sel: '.sec-work .work-card:nth-of-type(2) iframe',
+          poster: 'https://vumbnail.com/1188273137.jpg', parentSel: '.sec-work .work-card:nth-of-type(2)' }
+      ];
+
+      var pending = [];
+      targets.forEach(function (t) {
+        var el = document.querySelector(t.sel);
+        var parent = document.querySelector(t.parentSel);
+        if (!el || !parent) return;
+        var src = el.getAttribute('src');
+        if (src) {
+          el.setAttribute('data-src', src);
+          el.removeAttribute('src');
+        }
+        if (el.tagName === 'VIDEO') {
+          if (el.hasAttribute('autoplay')) {
+            el.removeAttribute('autoplay');
+            el.dataset.deferAutoplay = '1';
+          }
+          try { el.pause(); } catch (e) {}
+        }
+        parent.style.backgroundImage = 'url("' + t.poster + '")';
+        parent.style.backgroundSize = 'cover';
+        parent.style.backgroundPosition = 'center';
+        pending.push(parent);
+      });
+
+      if (!pending.length) return;
+
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          var parent = entry.target;
+          var media = parent.querySelector('video[data-src], iframe[data-src]');
+          if (media) {
+            var ds = media.getAttribute('data-src');
+            media.setAttribute('src', ds);
+            media.removeAttribute('data-src');
+            if (media.tagName === 'VIDEO') {
+              if (media.dataset.deferAutoplay) media.setAttribute('autoplay', '');
+              try { media.load(); media.play().catch(function () {}); } catch (e) {}
+            }
+          }
+          io.unobserve(parent);
+        });
+      }, { rootMargin: '250px 0px' });
+
+      pending.forEach(function (p) { io.observe(p); });
+    })();
+  </script>
 </body>
 </html>
