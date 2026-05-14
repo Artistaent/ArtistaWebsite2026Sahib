@@ -1137,7 +1137,7 @@ iframe.visual-frame__media {
   .display-xl { font-size: clamp(32px, 8vw, 56px); }
   .display-md { font-size: clamp(24px, 5.5vw, 36px); }
   .work-footer { flex-direction: column; align-items: flex-start; gap: 18px; }
-  .contact-list li { grid-template-columns: 80px 1fr auto; gap: 12px; }
+  .contact-list li { grid-template-columns: 56px 1fr auto; gap: 10px; }
   .cta-bar { flex-direction: column; align-items: flex-start; }
   .logo-grid__row { grid-template-columns: repeat(2, 1fr); }
   .site-footer { position: static; margin-top: 40px; flex-direction: column; gap: 8px; align-items: flex-start; }
@@ -1509,10 +1509,17 @@ iframe.visual-frame__media {
   .sec-contact .display-xl { font-size: clamp(32px, 9vw, 52px); line-height: 1.0; }
   .contact-subhead { font-size: 13px; }
   .contact-list { margin-top: 18px; }
-  .contact-list li { padding: 14px 0; gap: 10px; grid-template-columns: 70px 1fr auto; }
+  .contact-list li { padding: 14px 0; gap: 10px; grid-template-columns: 56px 1fr auto; }
   .contact-list__label { font-size: 10px; }
-  .contact-list__value { font-size: 15px; word-break: break-word; }
-  .contact-list__arrow { width: 28px; }
+  .contact-list__value {
+    font-size: clamp(12px, 3.7vw, 15px);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: clip;
+  }
+  .contact-list__arrow { width: 28px; flex-shrink: 0; }
   /* Marquee on contact slide is full-bleed */
   .sec-contact .logo-marquee { padding: 18px 0; }
 
@@ -1669,9 +1676,16 @@ iframe.visual-frame__media {
 @media (max-width: 420px) {
   .brand-mega { font-size: clamp(48px, 16vw, 92px); }
   .sec-about .display-xl { font-size: clamp(24px, 6.5vw, 36px); }
-  .contact-list li { grid-template-columns: 64px 1fr auto; gap: 8px; }
-  .contact-list__label { font-size: 11px; }
-  .contact-list__value { font-size: 14px; }
+  .contact-list li { grid-template-columns: 50px 1fr auto; gap: 8px; }
+  .contact-list__label { font-size: 10px; }
+  .contact-list__value {
+    font-size: clamp(11px, 3.6vw, 14px);
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: clip;
+  }
 }
 
 /* ============================================================
