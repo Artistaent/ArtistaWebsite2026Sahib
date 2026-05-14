@@ -288,6 +288,36 @@
        ============================================================ -->
   <style>
     @media (max-width: 820px) {
+      /* ============================================================
+         iOS Safari shows a centered native "play" overlay on
+         <video> elements when autoplay is blocked or delayed.
+         The local v2 / v3 / v4 videos all autoplay muted+loop, so
+         no controls UI is needed. Force-hide the native overlay,
+         the start-playback button, and any standard control panel
+         on these specific videos for mobile only.
+         ============================================================ */
+      .visual-frame__media,
+      .sec-video__media {
+        pointer-events: none !important;
+      }
+      .visual-frame__media::-webkit-media-controls,
+      .visual-frame__media::-webkit-media-controls-enclosure,
+      .visual-frame__media::-webkit-media-controls-panel,
+      .visual-frame__media::-webkit-media-controls-overlay-play-button,
+      .visual-frame__media::-webkit-media-controls-start-playback-button,
+      .visual-frame__media::-webkit-media-controls-play-button,
+      .sec-video__media::-webkit-media-controls,
+      .sec-video__media::-webkit-media-controls-enclosure,
+      .sec-video__media::-webkit-media-controls-panel,
+      .sec-video__media::-webkit-media-controls-overlay-play-button,
+      .sec-video__media::-webkit-media-controls-start-playback-button,
+      .sec-video__media::-webkit-media-controls-play-button {
+        display: none !important;
+        -webkit-appearance: none !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+
       .mobile-poster {
         position: absolute;
         inset: 0;
@@ -328,6 +358,55 @@
       .mobile-poster__play svg { width: 22px; height: 22px; fill: #fff; transform: translateX(2px); }
     }
   </style>
+  <script>
+    /* ============================================================
+       MOBILE-ONLY: force the local v2 / v3 / v4 videos to play.
+       iOS Safari blocks autoplay in Low Power Mode and occasionally
+       under aggressive data-saver / battery conditions even when
+       autoplay+muted+playsinline are all set. We:
+         1) reassert muted + playsInline at runtime
+         2) call .play() explicitly
+         3) if the play promise rejects, queue another attempt on
+            the first user gesture (touchstart / click / scroll)
+       ============================================================ */
+    (function () {
+      if (!window.matchMedia('(max-width: 820px)').matches) return;
+
+      var localVideos = document.querySelectorAll(
+        '.visual-frame__media, .sec-video__media'
+      );
+      if (!localVideos.length) return;
+
+      function forcePlay(v) {
+        try {
+          v.muted = true;
+          v.defaultMuted = true;
+          v.playsInline = true;
+          v.setAttribute('muted', '');
+          v.setAttribute('playsinline', '');
+          v.setAttribute('webkit-playsinline', '');
+          var p = v.play();
+          if (p && typeof p.catch === 'function') {
+            p.catch(function () { /* will retry on gesture */ });
+          }
+        } catch (e) { /* no-op */ }
+      }
+
+      localVideos.forEach(forcePlay);
+
+      var retry = function () {
+        localVideos.forEach(forcePlay);
+      };
+      ['touchstart', 'touchend', 'click', 'scroll'].forEach(function (evt) {
+        window.addEventListener(evt, retry, { once: true, passive: true });
+      });
+
+      document.addEventListener('visibilitychange', function () {
+        if (!document.hidden) localVideos.forEach(forcePlay);
+      });
+    })();
+  </script>
+
   <script>
     (function () {
       if (!window.matchMedia('(max-width: 820px)').matches) return;
